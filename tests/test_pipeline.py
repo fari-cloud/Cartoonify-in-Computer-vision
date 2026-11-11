@@ -24,23 +24,55 @@ def sample_image(tmp_path_factory) -> Path:
     return path
 
 
+STYLES = ("classic", "sketch", "comic", "hdr")
+
+
 class TestPipeline:
-    def test_cartoonify_returns_all_stages(self, sample_image):
-        stages = cartoonify(read_image(sample_image))
+    @pytest.mark.parametrize("style", STYLES)
+    def test_all_styles_produce_rgb_cartoon(self, sample_image, style):
+        stages = cartoonify(read_image(sample_image), style=style)
 
         assert stages.original.shape == (200, 300, 3)
         assert stages.grayscale.ndim == 2
-        assert stages.edges.ndim == 2
-        assert stages.flattened.shape == (200, 300, 3)
         assert stages.cartoon.shape == (200, 300, 3)
 
+    def test_classic_returns_all_stages(self, sample_image):
+        stages = cartoonify(read_image(sample_image), style="classic")
+
+        assert stages.edges.ndim == 2
+        assert stages.flattened.shape == (200, 300, 3)
+
+    def test_sketch_has_no_edge_stage(self, sample_image):
+        stages = cartoonify(read_image(sample_image), style="sketch")
+
+        assert stages.edges is None
+        assert stages.flattened is None
+
+    def test_comic_posterizes_colors(self, sample_image):
+        stages = cartoonify(read_image(sample_image), style="comic")
+
+        assert len(np.unique(stages.flattened.reshape(-1, 3), axis=0)) <= 8
+
     def test_edges_are_binary(self, sample_image):
-        stages = cartoonify(read_image(sample_image))
+        stages = cartoonify(read_image(sample_image), style="classic")
         assert set(np.unique(stages.edges)).issubset({0, 255})
 
-    def test_cartoon_differs_from_original(self, sample_image):
-        stages = cartoonify(read_image(sample_image))
+    @pytest.mark.parametrize("style", STYLES)
+    def test_cartoon_differs_from_original(self, sample_image, style):
+        stages = cartoonify(read_image(sample_image), style=style)
         assert not np.array_equal(stages.cartoon, stages.original)
+
+    def test_styles_produce_different_results(self, sample_image):
+        image = read_image(sample_image)
+        cartoons = [cartoonify(image, style=s).cartoon for s in STYLES]
+
+        for i in range(len(cartoons)):
+            for j in range(i + 1, len(cartoons)):
+                assert not np.array_equal(cartoons[i], cartoons[j])
+
+    def test_rejects_unknown_style(self, sample_image):
+        with pytest.raises(ValueError, match="Unknown style"):
+            cartoonify(read_image(sample_image), style="watercolor")
 
     def test_rejects_grayscale_input(self):
         gray = np.zeros((10, 10), dtype=np.uint8)
@@ -69,7 +101,7 @@ class TestCli:
 
     def test_default_output_path(self, sample_image):
         rc = main([str(sample_image)])
-        default = sample_image.with_name("sample_cartoon.png")
+        default = sample_image.with_name("sample_classic.png")
 
         assert rc == 0
         assert default.exists()
@@ -81,6 +113,25 @@ class TestCli:
         assert rc == 0
         for name in ("original", "grayscale", "edges", "flattened", "cartoon"):
             assert (stages_dir / f"{name}.png").exists()
+
+    def test_sketch_stages_dir_skips_missing_stages(self, sample_image, tmp_path):
+        stages_dir = tmp_path / "stages"
+        rc = main(
+            [str(sample_image), "--style", "sketch", "-o", str(tmp_path / "o.png"),
+             "--stages-dir", str(stages_dir)]
+        )
+
+        assert rc == 0
+        assert (stages_dir / "cartoon.png").exists()
+        assert not (stages_dir / "edges.png").exists()
+
+    @pytest.mark.parametrize("style", STYLES)
+    def test_all_styles_run_via_cli(self, sample_image, tmp_path, style):
+        output = tmp_path / f"{style}.png"
+        rc = main([str(sample_image), "--style", style, "-o", str(output)])
+
+        assert rc == 0
+        assert output.exists()
 
     def test_missing_input_returns_error(self, tmp_path, capsys):
         rc = main([str(tmp_path / "missing.png")])

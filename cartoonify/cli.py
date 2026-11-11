@@ -6,6 +6,9 @@ from pathlib import Path
 
 from cartoonify.pipeline import cartoonify, read_image, save_image
 
+STYLES = ("classic", "sketch", "comic", "hdr")
+STAGE_NAMES = ("original", "grayscale", "edges", "flattened", "cartoon")
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -13,7 +16,13 @@ def build_parser() -> argparse.ArgumentParser:
         description="Turn a photo into a cartoon-style image with OpenCV.",
     )
     parser.add_argument("input", help="path to the input image")
-    parser.add_argument("-o", "--output", help="path for the cartoon image (default: <input>_cartoon.png)")
+    parser.add_argument("-o", "--output", help="path for the cartoon image (default: <input>_<style>.png)")
+    parser.add_argument(
+        "--style",
+        choices=STYLES,
+        default="classic",
+        help="cartoon style (default: classic)",
+    )
     parser.add_argument(
         "--stages-dir",
         type=Path,
@@ -27,8 +36,10 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    output = Path(args.output) if args.output else Path(args.input).with_name(
-        Path(args.input).stem + "_cartoon.png"
+    output = (
+        Path(args.output)
+        if args.output
+        else Path(args.input).with_name(f"{Path(args.input).stem}_{args.style}.png")
     )
 
     try:
@@ -37,17 +48,28 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Error: {exc}", file=sys.stderr)
         return 1
 
-    stages = cartoonify(
-        image, block_size=args.block_size, c=args.c, diameter=args.diameter
-    )
+    try:
+        stages = cartoonify(
+            image,
+            style=args.style,
+            block_size=args.block_size,
+            c=args.c,
+            diameter=args.diameter,
+        )
+    except ValueError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+
     output.parent.mkdir(parents=True, exist_ok=True)
     save_image(stages.cartoon, output)
     print(f"Cartoon saved to: {output}")
 
     if args.stages_dir:
         args.stages_dir.mkdir(parents=True, exist_ok=True)
-        for name in ("original", "grayscale", "edges", "flattened", "cartoon"):
-            save_image(getattr(stages, name), args.stages_dir / f"{name}.png")
+        for name in STAGE_NAMES:
+            stage = getattr(stages, name)
+            if stage is not None:
+                save_image(stage, args.stages_dir / f"{name}.png")
         print(f"Pipeline stages saved to: {args.stages_dir}")
 
     return 0

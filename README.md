@@ -4,9 +4,26 @@ Turn photos into cartoon-style images with OpenCV. This project rebuilds the
 original notebook (`notebooks/farwa_irfan.ipynb`) as an installable Python
 package with a CLI and tests.
 
-## How it works
+## Examples
 
-The pipeline follows the classic OpenCV cartoon effect:
+Input photo (`examples/input.jpg`) rendered in the four available styles:
+
+| Classic | Sketch |
+| --- | --- |
+| ![Classic cartoon](examples/coffee_classic.jpg) | ![Pencil sketch](examples/coffee_sketch.jpg) |
+| **Comic** | **HDR** |
+| ![Comic cartoon](examples/coffee_comic.jpg) | ![HDR paint](examples/coffee_hdr.jpg) |
+
+## Styles
+
+| Style | Effect |
+| --- | --- |
+| `classic` | Edge mask over bilateral-filtered colors — the classic OpenCV cartoon effect |
+| `sketch` | Pencil-sketch look using the gray-dodge technique |
+| `comic` | Posterized colors (k-means) with strong outlines |
+| `hdr` | Painted look from repeated bilateral filtering |
+
+The classic pipeline:
 
 1. **Grayscale + median blur** — smooth noise before edge detection
 2. **Adaptive threshold** — detect the outlines of the scene
@@ -45,6 +62,14 @@ Save intermediate pipeline stages for inspection:
 cartoonify photo.jpg -o cartoon.png --stages-dir stages/
 ```
 
+Try a different style:
+
+```bash
+cartoonify photo.jpg --style sketch
+cartoonify photo.jpg --style comic
+cartoonify photo.jpg --style hdr
+```
+
 Tune the effect:
 
 ```bash
@@ -56,7 +81,7 @@ From Python:
 ```python
 from cartoonify import cartoonify, read_image, save_image
 
-stages = cartoonify(read_image("photo.jpg"))
+stages = cartoonify(read_image("photo.jpg"), style="comic")
 save_image(stages.cartoon, "cartoon.png")
 ```
 
@@ -65,7 +90,8 @@ CLI options:
 | Option | Default | Description |
 | --- | --- | --- |
 | `input` | — | path to the input image |
-| `-o, --output` | `<input>_cartoon.png` | output image path |
+| `-o, --output` | `<input>_<style>.png` | output image path |
+| `--style` | `classic` | `classic`, `sketch`, `comic` or `hdr` |
 | `--stages-dir` | off | directory to save every pipeline stage |
 | `--block-size` | 9 | edge detection neighborhood size (odd) |
 | `--c` | 9 | constant subtracted from the neighborhood mean |
