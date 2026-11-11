@@ -4,6 +4,16 @@ Turn photos into cartoon-style images with OpenCV. This project rebuilds the
 original notebook (`notebooks/farwa_irfan.ipynb`) as an installable Python
 package with a CLI and tests.
 
+## Live demo
+
+Try it in the browser — upload a photo, pick a style:
+
+**[https://fari-cloud-cartoonify.hf.space](https://fari-cloud-cartoonify.hf.space)**
+
+The demo runs on [Hugging Face Spaces](https://huggingface.co/spaces) using the
+Gradio app in [`space/`](space/). See [`space/DEPLOY.md`](space/DEPLOY.md) for
+the deployment steps.
+
 ## Examples
 
 Input photo (`examples/input.jpg`) rendered in the four available styles:
