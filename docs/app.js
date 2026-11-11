@@ -87,6 +87,17 @@ function toRGB(src) {
   return rgb;
 }
 
+function bilateralN(rgb, iterations, sigmaColor, sigmaSpace) {
+  let result = rgb;
+  for (let i = 0; i < iterations; i++) {
+    const next = new cv.Mat();
+    cv.bilateralFilter(result, next, 9, sigmaColor, sigmaSpace);
+    if (i > 0) result.delete();
+    result = next;
+  }
+  return result;
+}
+
 function classicCartoon(src) {
   const gray = toGray(src);
   const smooth = new cv.Mat();
@@ -99,8 +110,7 @@ function classicCartoon(src) {
   );
 
   const rgb = toRGB(src);
-  const flat = new cv.Mat();
-  cv.bilateralFilter(rgb, flat, 9, 300, 300);
+  const flat = bilateralN(rgb, 2, 250, 250);
 
   const cartoonRGB = new cv.Mat();
   cv.bitwise_and(flat, flat, cartoonRGB, edges);
@@ -119,7 +129,7 @@ function sketchCartoon(src) {
   cv.bitwise_not(gray, inverted);
 
   const blurred = new cv.Mat();
-  cv.GaussianBlur(inverted, blurred, new cv.Size(21, 21), 0);
+  cv.GaussianBlur(inverted, blurred, new cv.Size(25, 25), 0);
 
   const divisor = new cv.Mat();
   cv.bitwise_not(blurred, divisor);
@@ -127,10 +137,18 @@ function sketchCartoon(src) {
   const sketch = new cv.Mat();
   cv.divide(gray, divisor, sketch, 256, -1);
 
-  const result = new cv.Mat();
-  cv.cvtColor(sketch, result, cv.COLOR_GRAY2RGBA);
+  const gamma = new cv.Mat(1, 256, cv.CV_8U);
+  for (let i = 0; i < 256; i++) {
+    gamma.data[i] = Math.round(255 * Math.pow(i / 255, 1.6));
+  }
+  const contrasted = new cv.Mat();
+  cv.LUT(sketch, gamma, contrasted);
 
-  gray.delete(); inverted.delete(); blurred.delete(); divisor.delete(); sketch.delete();
+  const result = new cv.Mat();
+  cv.cvtColor(contrasted, result, cv.COLOR_GRAY2RGBA);
+
+  gray.delete(); inverted.delete(); blurred.delete(); divisor.delete();
+  sketch.delete(); gamma.delete(); contrasted.delete();
   return result;
 }
 
@@ -151,18 +169,21 @@ function posterize(rgb, k) {
   );
   cv.kmeans(samples, k, labels, criteria, 3, cv.KMEANS_PP_CENTERS, centers);
 
+  const centers8 = new cv.Mat();
+  centers.convertTo(centers8, cv.CV_8U);
+
   const flat = new cv.Mat(rows, 1, cv.CV_8UC3);
   for (let i = 0; i < rows; i++) {
     const c = labels.data32S[i] * 3;
-    flat.data[i * 3] = centers.data[c];
-    flat.data[i * 3 + 1] = centers.data[c + 1];
-    flat.data[i * 3 + 2] = centers.data[c + 2];
+    flat.data[i * 3] = centers8.data[c];
+    flat.data[i * 3 + 1] = centers8.data[c + 1];
+    flat.data[i * 3 + 2] = centers8.data[c + 2];
   }
 
   const result = new cv.Mat(rgb.rows, rgb.cols, cv.CV_8UC3);
   result.data.set(flat.data);
 
-  samples.delete(); labels.delete(); centers.delete(); flat.delete();
+  samples.delete(); labels.delete(); centers.delete(); centers8.delete(); flat.delete();
   return result;
 }
 
@@ -174,7 +195,7 @@ function comicCartoon(src) {
   const edges = new cv.Mat();
   cv.adaptiveThreshold(
     smooth, edges, 255,
-    cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, 9, 9
+    cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, 9, 7
   );
 
   const rgb = toRGB(src);
@@ -193,16 +214,17 @@ function comicCartoon(src) {
 
 function hdrCartoon(src) {
   const rgb = toRGB(src);
-  let result = rgb;
-  for (let i = 0; i < 3; i++) {
-    const next = new cv.Mat();
-    cv.bilateralFilter(result, next, 9, 200, 200);
-    if (i > 0) result.delete();
-    result = next;
-  }
+  const small = new cv.Mat();
+  cv.pyrDown(rgb, small);
+  const flat = bilateralN(small, 4, 60, 60);
+  const up = new cv.Mat();
+  cv.pyrUp(flat, up);
   const out = new cv.Mat();
-  cv.cvtColor(result, out, cv.COLOR_RGB2RGBA);
-  result.delete();
+  cv.cvtColor(up, out, cv.COLOR_RGB2RGBA);
+  rgb.delete();
+  small.delete();
+  flat.delete();
+  up.delete();
   return out;
 }
 
