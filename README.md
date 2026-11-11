@@ -8,11 +8,12 @@ package with a CLI and tests.
 
 Try it in the browser — upload a photo, pick a style:
 
-**[https://fari-cloud-cartoonify.hf.space](https://fari-cloud-cartoonify.hf.space)**
+**[https://fari-cloud.github.io/Cartoonify-in-Computer-vision/](https://fari-cloud.github.io/Cartoonify-in-Computer-vision/)**
 
-The demo runs on [Hugging Face Spaces](https://huggingface.co/spaces) using the
-Gradio app in [`space/`](space/). See [`space/DEPLOY.md`](space/DEPLOY.md) for
-the deployment steps.
+The demo is a static page in [`docs/`](docs/) powered by
+[OpenCV.js](https://docs.opencv.org/4.x/d5/d10/tutorial_js_root.html): the same
+four styles as the Python package, running entirely in the visitor's browser —
+no server, no API keys, nothing to install.
 
 ## Examples
 

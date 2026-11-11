@@ -1,2 +1,0 @@
-cartoonify @ git+https://github.com/fari-cloud/Cartoonify-in-Computer-vision
-gradio==6.31.0
