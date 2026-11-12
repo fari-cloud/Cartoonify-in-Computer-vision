@@ -2,7 +2,7 @@
 
 :root,
 :root[data-theme="neon"] {
-  --bg: #07080d;
+  --bg: #100e17;
   --surface: #10131c;
   --surface-2: #161a26;
   --ink: #edeff4;
@@ -18,7 +18,7 @@
   --neon3: #ff6a3d;
   --grad: linear-gradient(120deg, var(--neon1), var(--neon2) 55%, var(--neon3));
   --glow: 0 0 22px rgba(124, 92, 255, 0.4), 0 0 60px rgba(196, 76, 255, 0.15);
-  --plexus-rgb: 165, 215, 255;
+  --plexus-rgb: 130, 170, 215;
   --text-glow: 0 0 18px rgba(196, 76, 255, 0.45);
   --radius: 16px;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 10px 30px rgba(0, 0, 0, 0.45);
@@ -26,7 +26,7 @@
 }
 
 :root[data-theme="cyber"] {
-  --bg: #0a0714;
+  --bg: #130a1f;
   --surface: #140f24;
   --surface-2: #1b1430;
   --accent: #ff2fb3;
@@ -42,7 +42,7 @@
 }
 
 :root[data-theme="ocean"] {
-  --bg: #040b14;
+  --bg: #071120;
   --surface: #0a1522;
   --surface-2: #0e1c2e;
   --accent: #00c8ff;
@@ -58,7 +58,7 @@
 }
 
 :root[data-theme="sunset"] {
-  --bg: #120709;
+  --bg: #1c0e12;
   --surface: #1d0f13;
   --surface-2: #261419;
   --accent: #ff5e3a;
