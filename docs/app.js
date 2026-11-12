@@ -374,3 +374,99 @@ themePopup.querySelectorAll("button[data-theme]").forEach((btn) => {
 });
 
 applyTheme(savedTheme);
+
+const bgCanvas = document.getElementById("bg-canvas");
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+let bgNodes = [];
+let bgAnimId = null;
+
+function plexusColor() {
+  return (
+    getComputedStyle(document.documentElement)
+      .getPropertyValue("--plexus-rgb")
+      .trim() || "165, 215, 255"
+  );
+}
+
+function resizeBg() {
+  bgCanvas.width = window.innerWidth;
+  bgCanvas.height = window.innerHeight;
+  const target = Math.min(
+    110,
+    Math.max(40, Math.round((bgCanvas.width * bgCanvas.height) / 22000))
+  );
+  while (bgNodes.length < target) {
+    bgNodes.push({
+      x: Math.random() * bgCanvas.width,
+      y: Math.random() * bgCanvas.height,
+      vx: (Math.random() - 0.5) * 0.35,
+      vy: (Math.random() - 0.5) * 0.35,
+      r: 1.2 + Math.random() * 1.6,
+    });
+  }
+  bgNodes.length = Math.min(bgNodes.length, target);
+}
+
+function drawBg() {
+  const ctx = bgCanvas.getContext("2d");
+  const rgb = plexusColor();
+  const LINK = 130;
+  ctx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+  for (const n of bgNodes) {
+    n.x += n.vx;
+    n.y += n.vy;
+    if (n.x < -20) n.x = bgCanvas.width + 20;
+    if (n.x > bgCanvas.width + 20) n.x = -20;
+    if (n.y < -20) n.y = bgCanvas.height + 20;
+    if (n.y > bgCanvas.height + 20) n.y = -20;
+  }
+
+  ctx.lineWidth = 1;
+  for (let i = 0; i < bgNodes.length; i++) {
+    for (let j = i + 1; j < bgNodes.length; j++) {
+      const dx = bgNodes[i].x - bgNodes[j].x;
+      const dy = bgNodes[i].y - bgNodes[j].y;
+      const d2 = dx * dx + dy * dy;
+      if (d2 < LINK * LINK) {
+        const a = (1 - Math.sqrt(d2) / LINK) * 0.5;
+        ctx.strokeStyle = `rgba(${rgb}, ${a.toFixed(3)})`;
+        ctx.beginPath();
+        ctx.moveTo(bgNodes[i].x, bgNodes[i].y);
+        ctx.lineTo(bgNodes[j].x, bgNodes[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+
+  ctx.shadowBlur = 6;
+  for (const n of bgNodes) {
+    ctx.fillStyle = `rgba(${rgb}, 0.9)`;
+    ctx.shadowColor = `rgba(${rgb}, 0.9)`;
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.shadowBlur = 0;
+}
+
+function startBg() {
+  resizeBg();
+  if (reduceMotion) {
+    drawBg();
+    return;
+  }
+  cancelAnimationFrame(bgAnimId);
+  const loop = () => {
+    if (!document.hidden) drawBg();
+    bgAnimId = requestAnimationFrame(loop);
+  };
+  loop();
+}
+
+window.addEventListener("resize", () => {
+  resizeBg();
+  if (reduceMotion) drawBg();
+});
+
+startBg();

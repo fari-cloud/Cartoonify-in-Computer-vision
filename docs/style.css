@@ -18,8 +18,7 @@
   --neon3: #ff6a3d;
   --grad: linear-gradient(120deg, var(--neon1), var(--neon2) 55%, var(--neon3));
   --glow: 0 0 22px rgba(124, 92, 255, 0.4), 0 0 60px rgba(196, 76, 255, 0.15);
-  --blob-op: 0.22;
-  --grid-op: 0.05;
+  --plexus-rgb: 165, 215, 255;
   --text-glow: 0 0 18px rgba(196, 76, 255, 0.45);
   --radius: 16px;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 10px 30px rgba(0, 0, 0, 0.45);
@@ -38,7 +37,7 @@
   --neon2: #b44cff;
   --neon3: #00e5ff;
   --glow: 0 0 22px rgba(255, 47, 179, 0.4), 0 0 60px rgba(0, 229, 255, 0.15);
-  --blob-op: 0.24;
+  --plexus-rgb: 0, 229, 255;
   --text-glow: 0 0 18px rgba(255, 47, 179, 0.5);
 }
 
@@ -54,7 +53,7 @@
   --neon2: #00c8ff;
   --neon3: #00ffa3;
   --glow: 0 0 22px rgba(0, 200, 255, 0.4), 0 0 60px rgba(0, 255, 163, 0.12);
-  --blob-op: 0.2;
+  --plexus-rgb: 0, 200, 255;
   --text-glow: 0 0 18px rgba(0, 200, 255, 0.5);
 }
 
@@ -70,7 +69,7 @@
   --neon2: #ff5e3a;
   --neon3: #ffc93a;
   --glow: 0 0 22px rgba(255, 94, 58, 0.4), 0 0 60px rgba(255, 201, 58, 0.15);
-  --blob-op: 0.22;
+  --plexus-rgb: 255, 170, 110;
   --text-glow: 0 0 18px rgba(255, 94, 58, 0.5);
 }
 
@@ -91,8 +90,7 @@
   --neon3: #ff6a3d;
   --grad: linear-gradient(120deg, var(--neon1), var(--neon2) 55%, var(--neon3));
   --glow: 0 0 18px rgba(107, 77, 255, 0.25);
-  --blob-op: 0.14;
-  --grid-op: 0.04;
+  --plexus-rgb: 100, 80, 210;
   --text-glow: none;
   --shadow: 0 1px 2px rgba(29, 33, 48, 0.06), 0 10px 30px rgba(29, 33, 48, 0.1);
   --shadow-lg: 0 2px 4px rgba(29, 33, 48, 0.08), 0 20px 50px rgba(29, 33, 48, 0.14);
@@ -121,7 +119,7 @@ h1, .brand-name, #style-picker legend, .btn, .badge {
   font-family: "Orbitron", "Poppins", sans-serif;
 }
 
-/* ---------- Animated neon background ---------- */
+/* ---------- Plexus network background ---------- */
 
 .bg-fx {
   position: fixed;
@@ -131,60 +129,14 @@ h1, .brand-name, #style-picker legend, .btn, .badge {
   pointer-events: none;
 }
 
-.blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(90px);
-  opacity: var(--blob-op);
-  background: var(--neon1);
-  transition: background 0.35s;
-  animation: drift 18s ease-in-out infinite alternate;
-}
-
-.b1 {
-  width: 55vw; height: 55vw;
-  min-width: 420px; min-height: 420px;
-  left: -12vw; top: -18vw;
-  background: var(--neon1);
-}
-
-.b2 {
-  width: 48vw; height: 48vw;
-  min-width: 380px; min-height: 380px;
-  right: -14vw; top: -14vw;
-  background: var(--neon3);
-  animation-delay: -6s;
-  animation-duration: 22s;
-}
-
-.b3 {
-  width: 42vw; height: 42vw;
-  min-width: 340px; min-height: 340px;
-  left: 28vw; bottom: -22vw;
-  background: var(--neon2);
-  animation-delay: -12s;
-  animation-duration: 26s;
-}
-
-@keyframes drift {
-  from { transform: translate(0, 0) scale(1); }
-  to { transform: translate(6vw, 4vh) scale(1.15); }
-}
-
-.grid-overlay {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(var(--ink) 1px, transparent 1px),
-    linear-gradient(90deg, var(--ink) 1px, transparent 1px);
-  background-size: 44px 44px;
-  opacity: var(--grid-op);
-  mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 30%, transparent 75%);
-  -webkit-mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 30%, transparent 75%);
+#bg-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .blob, .brand-mark, .btn-primary, .panel, .canvas-card, .hero .accent { animation: none; }
+  .brand-mark, .btn-primary, .panel, .canvas-card, .hero .accent { animation: none; }
 }
 
 /* ---------- Top bar ---------- */
