@@ -98,31 +98,6 @@ function bilateralN(rgb, iterations, sigmaColor, sigmaSpace) {
   return result;
 }
 
-function classicCartoon(src) {
-  const gray = toGray(src);
-  const smooth = new cv.Mat();
-  cv.medianBlur(gray, smooth, 5);
-
-  const edges = new cv.Mat();
-  cv.adaptiveThreshold(
-    smooth, edges, 255,
-    cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, 9, 9
-  );
-
-  const rgb = toRGB(src);
-  const flat = bilateralN(rgb, 2, 250, 250);
-
-  const cartoonRGB = new cv.Mat();
-  cv.bitwise_and(flat, flat, cartoonRGB, edges);
-
-  const cartoon = new cv.Mat();
-  cv.cvtColor(cartoonRGB, cartoon, cv.COLOR_RGB2RGBA);
-
-  gray.delete(); smooth.delete(); edges.delete(); rgb.delete(); flat.delete();
-  cartoonRGB.delete();
-  return cartoon;
-}
-
 function sketchCartoon(src) {
   const gray = toGray(src);
   const inverted = new cv.Mat();
@@ -250,10 +225,9 @@ function hdrCartoon(src) {
 
 function cartoonify(src, style) {
   switch (style) {
-    case "sketch": return sketchCartoon(src);
     case "comic": return comicCartoon(src);
     case "hdr": return hdrCartoon(src);
-    default: return classicCartoon(src);
+    default: return sketchCartoon(src);
   }
 }
 
@@ -472,7 +446,7 @@ window.addEventListener("resize", () => {
 startBg();
 
 const styleRadios = [...document.querySelectorAll('input[name="style"]')];
-const SHORTCUT_KEYS = ["1", "2", "3", "4"];
+const SHORTCUT_KEYS = ["1", "2", "3"];
 
 document.addEventListener("keydown", (e) => {
   if (e.target.tagName === "INPUT" && e.target.type === "text") return;

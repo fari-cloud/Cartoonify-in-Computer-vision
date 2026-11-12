@@ -11,9 +11,10 @@ package with a CLI and tests.
 **[https://fari-cloud.github.io/Cartoonify-in-Computer-vision/](https://fari-cloud.github.io/Cartoonify-in-Computer-vision/)**
 
 The demo is a static page in [`docs/`](docs/) powered by
-[OpenCV.js](https://docs.opencv.org/4.x/d5/d10/tutorial_js_root.html): the same
-four styles as the Python package, running entirely in the visitor's browser —
-no server, no API keys, nothing to install.
+[OpenCV.js](https://docs.opencv.org/4.x/d5/d10/tutorial_js_root.html): three
+artistic styles — sketch, comic and hdr — running entirely in the visitor's
+browser; no server, no API keys, nothing to install. The Python package below
+also includes the classic OpenCV cartoon effect.
 
 ## Examples
 
