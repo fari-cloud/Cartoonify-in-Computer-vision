@@ -180,21 +180,43 @@ function posterize(rgb, k) {
   return result;
 }
 
+function boostSaturation(rgb, factor) {
+  const hsv = new cv.Mat();
+  cv.cvtColor(rgb, hsv, cv.COLOR_RGB2HSV);
+  const n = hsv.rows * hsv.cols;
+  for (let i = 0; i < n; i++) {
+    const idx = i * 3 + 1;
+    const s = hsv.data[idx] * factor;
+    hsv.data[idx] = s > 255 ? 255 : s;
+  }
+  const out = new cv.Mat();
+  cv.cvtColor(hsv, out, cv.COLOR_HSV2RGB);
+  hsv.delete();
+  return out;
+}
+
 function comicCartoon(src) {
   const gray = toGray(src);
   const smooth = new cv.Mat();
   cv.medianBlur(gray, smooth, 5);
 
-  const edges = new cv.Mat();
+  let edges = new cv.Mat();
   cv.adaptiveThreshold(
     smooth, edges, 255,
-    cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, 9, 7
+    cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, 9, 9
   );
+  const kernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(3, 3));
+  const thickEdges = new cv.Mat();
+  cv.dilate(edges, thickEdges, kernel, new cv.Point(-1, -1), 2);
+  edges.delete();
+  edges = thickEdges;
 
   const rgb = toRGB(src);
   const preSmooth = bilateralN(rgb, 1, 60, 60);
-  const flat = posterize(preSmooth, 10);
+  const flat0 = posterize(preSmooth, 10);
   preSmooth.delete();
+  const flat = boostSaturation(flat0, 1.4);
+  flat0.delete();
 
   const cartoonRGB = new cv.Mat();
   cv.bitwise_and(flat, flat, cartoonRGB, edges);
@@ -203,7 +225,7 @@ function comicCartoon(src) {
   cv.cvtColor(cartoonRGB, cartoon, cv.COLOR_RGB2RGBA);
 
   gray.delete(); smooth.delete(); edges.delete(); rgb.delete();
-  flat.delete(); cartoonRGB.delete();
+  flat.delete(); cartoonRGB.delete(); kernel.delete();
   return cartoon;
 }
 
@@ -218,20 +240,11 @@ function hdrCartoon(src) {
   const boosted = new cv.Mat();
   cv.addWeighted(rgb, 1.6, smooth2, -0.6, 0, boosted);
 
-  const hsv = new cv.Mat();
-  cv.cvtColor(boosted, hsv, cv.COLOR_RGB2HSV);
-  const n = hsv.rows * hsv.cols;
-  for (let i = 0; i < n; i++) {
-    const idx = i * 3 + 1;
-    const s = hsv.data[idx] * 1.35;
-    hsv.data[idx] = s > 255 ? 255 : s;
-  }
-  const vivid = new cv.Mat();
-  cv.cvtColor(hsv, vivid, cv.COLOR_HSV2RGB);
+  const vivid = boostSaturation(boosted, 1.35);
 
   const out = new cv.Mat();
   cv.cvtColor(vivid, out, cv.COLOR_RGB2RGBA);
-  rgb.delete(); smooth2.delete(); boosted.delete(); hsv.delete(); vivid.delete();
+  rgb.delete(); smooth2.delete(); boosted.delete(); vivid.delete();
   return out;
 }
 

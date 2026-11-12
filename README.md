@@ -31,7 +31,7 @@ Input photo (`examples/input.jpg`) rendered in the four available styles:
 | --- | --- |
 | `classic` | Edge mask over bilateral-filtered colors — the classic OpenCV cartoon effect |
 | `sketch` | Pencil-sketch look using the gray-dodge technique |
-| `comic` | Posterized colors (k-means) with strong outlines |
+| `comic` | Vivid comic-book colors with bold ink outlines |
 | `hdr` | Detail-enhanced photo look — sharper detail and more vivid colors |
 
 The classic pipeline:

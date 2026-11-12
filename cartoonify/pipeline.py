@@ -87,6 +87,13 @@ def posterize(image: np.ndarray, k: int = 10) -> np.ndarray:
     return palette[labels.flatten()].reshape(image.shape)
 
 
+def boost_saturation(image: np.ndarray, factor: float) -> np.ndarray:
+    """Increase color vividness in HSV space."""
+    hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV).astype(np.float32)
+    hsv[..., 1] = np.clip(hsv[..., 1] * factor, 0, 255)
+    return cv2.cvtColor(hsv.astype(np.uint8), cv2.COLOR_HSV2RGB)
+
+
 def detail_enhance(
     image: np.ndarray, detail: float = 0.6, saturation: float = 1.35
 ) -> np.ndarray:
@@ -94,9 +101,7 @@ def detail_enhance(
     smooth = cv2.bilateralFilter(image, 9, 60, 60)
     smooth = cv2.bilateralFilter(smooth, 9, 60, 60)
     boosted = cv2.addWeighted(image, 1.0 + detail, smooth, -detail, 0)
-    hsv = cv2.cvtColor(boosted, cv2.COLOR_RGB2HSV).astype(np.float32)
-    hsv[..., 1] = np.clip(hsv[..., 1] * saturation, 0, 255)
-    return cv2.cvtColor(hsv.astype(np.uint8), cv2.COLOR_HSV2RGB)
+    return boost_saturation(boosted, saturation)
 
 
 def combine(flattened: np.ndarray, edges: np.ndarray) -> np.ndarray:
@@ -139,12 +144,13 @@ def cartoonify(
         )
 
     smooth_grayscale = cv2.medianBlur(grayscale, 5)
-    edge_c = 7 if style == "comic" else c
+    edge_c = 9 if style == "comic" else c
     edges = detect_edges(smooth_grayscale, block_size=block_size, c=edge_c)
 
     if style == "comic":
         smoothed = cv2.bilateralFilter(image, 9, 60, 60)
-        flattened = posterize(smoothed, k=10)
+        flattened = boost_saturation(posterize(smoothed, k=10), 1.4)
+        edges = cv2.dilate(edges, np.ones((3, 3), np.uint8), iterations=2)
     elif style == "classic":
         flattened = flatten_colors(
             image, diameter=diameter, sigma_color=sigma_color, sigma_space=sigma_space
