@@ -23,7 +23,7 @@ Input photo (`examples/input.jpg`) rendered in the four available styles:
 | --- | --- |
 | ![Classic cartoon](examples/coffee_classic.jpg) | ![Pencil sketch](examples/coffee_sketch.jpg) |
 | **Comic** | **HDR** |
-| ![Comic cartoon](examples/coffee_comic.jpg) | ![HDR paint](examples/coffee_hdr.jpg) |
+| ![Comic cartoon](examples/coffee_comic.jpg) | ![HDR detail-enhanced](examples/coffee_hdr.jpg) |
 
 ## Styles
 
@@ -31,8 +31,8 @@ Input photo (`examples/input.jpg`) rendered in the four available styles:
 | --- | --- |
 | `classic` | Edge mask over bilateral-filtered colors — the classic OpenCV cartoon effect |
 | `sketch` | Pencil-sketch look using the gray-dodge technique |
-| `comic` | Posterized colors (k-means) with strong outlines |
-| `hdr` | Painted look from repeated bilateral filtering |
+| `comic` | Vivid comic-book colors with bold ink outlines |
+| `hdr` | Detail-enhanced photo look — sharper detail and more vivid colors |
 
 The classic pipeline:
 

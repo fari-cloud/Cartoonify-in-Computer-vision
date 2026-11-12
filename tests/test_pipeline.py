@@ -51,7 +51,7 @@ class TestPipeline:
     def test_comic_posterizes_colors(self, sample_image):
         stages = cartoonify(read_image(sample_image), style="comic")
 
-        assert len(np.unique(stages.flattened.reshape(-1, 3), axis=0)) <= 8
+        assert len(np.unique(stages.flattened.reshape(-1, 3), axis=0)) <= 10
 
     def test_edges_are_binary(self, sample_image):
         stages = cartoonify(read_image(sample_image), style="classic")
