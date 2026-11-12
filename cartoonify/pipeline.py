@@ -29,9 +29,47 @@ def pencil_sketch(image: np.ndarray) -> np.ndarray:
     """Create a pencil-sketch look with the gray-dodge technique."""
     grayscale = to_grayscale(image)
     inverted = 255 - grayscale
-    blurred = cv2.GaussianBlur(inverted, (21, 21), 0)
+    blurred = cv2.GaussianBlur(inverted, (25, 25), 0)
     sketch = cv2.divide(grayscale, 255 - blurred, scale=256)
+    gamma = np.uint8([255 * (i / 255) ** 1.6 for i in range(256)])
+    sketch = cv2.LUT(sketch, gamma)
     return cv2.cvtColor(sketch, cv2.COLOR_GRAY2RGB)
+
+
+def flatten_colors(
+    image: np.ndarray,
+    diameter: int = 9,
+    sigma_color: int = 250,
+    sigma_space: int = 250,
+    iterations: int = 2,
+) -> np.ndarray:
+    """Smooth flat regions while keeping edges sharp with a bilateral filter."""
+    result = image
+    for _ in range(iterations):
+        result = cv2.bilateralFilter(
+            result, diameter, sigma_color, sigma_space
+        )
+    return result
+
+
+def posterize(image: np.ndarray, k: int = 8) -> np.ndarray:
+    """Reduce the image to ``k`` dominant colors with k-means."""
+    pixels = np.float32(image).reshape(-1, 3)
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+    _, labels, centers = cv2.kmeans(
+        pixels, k, None, criteria, 3, cv2.KMEANS_PP_CENTERS
+    )
+    palette = np.uint8(centers)
+    return palette[labels.flatten()].reshape(image.shape)
+
+
+def painted(image: np.ndarray, iterations: int = 4) -> np.ndarray:
+    """Create a painted look: downscale, flatten with bilateral filtering, upscale."""
+    small = cv2.pyrDown(image)
+    result = small
+    for _ in range(iterations):
+        result = cv2.bilateralFilter(result, 9, 60, 60)
+    return cv2.pyrUp(result)
 
 
 def posterize(image: np.ndarray, k: int = 8) -> np.ndarray:
@@ -70,24 +108,9 @@ def detect_edges(grayscale: np.ndarray, block_size: int = 9, c: int = 9) -> np.n
     )
 
 
-def flatten_colors(
-    image: np.ndarray, diameter: int = 9, sigma_color: int = 300, sigma_space: int = 300
-) -> np.ndarray:
-    """Smooth flat regions while keeping edges sharp with a bilateral filter."""
-    return cv2.bilateralFilter(image, diameter, sigma_color, sigma_space)
-
-
 def combine(flattened: np.ndarray, edges: np.ndarray) -> np.ndarray:
     """Mask the flattened colors with the detected edges."""
     return cv2.bitwise_and(flattened, flattened, mask=edges)
-
-
-def painted(image: np.ndarray, iterations: int = 3) -> np.ndarray:
-    """Create a painted look with repeated bilateral filtering."""
-    result = image
-    for _ in range(iterations):
-        result = cv2.bilateralFilter(result, 9, 200, 200)
-    return result
 
 
 def cartoonify(
@@ -96,8 +119,8 @@ def cartoonify(
     block_size: int = 9,
     c: int = 9,
     diameter: int = 9,
-    sigma_color: int = 300,
-    sigma_space: int = 300,
+    sigma_color: int = 250,
+    sigma_space: int = 250,
 ) -> CartoonifyStages:
     """Run the cartoonify pipeline in the given style and return every stage."""
     if image.ndim != 3 or image.shape[2] != 3:
@@ -125,7 +148,8 @@ def cartoonify(
         )
 
     smooth_grayscale = cv2.medianBlur(grayscale, 5)
-    edges = detect_edges(smooth_grayscale, block_size=block_size, c=c)
+    edge_c = 7 if style == "comic" else c
+    edges = detect_edges(smooth_grayscale, block_size=block_size, c=edge_c)
 
     if style == "comic":
         flattened = posterize(image, k=8)
