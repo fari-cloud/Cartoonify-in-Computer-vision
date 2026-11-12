@@ -392,8 +392,8 @@ function resizeBg() {
   bgCanvas.width = window.innerWidth;
   bgCanvas.height = window.innerHeight;
   const target = Math.min(
-    110,
-    Math.max(40, Math.round((bgCanvas.width * bgCanvas.height) / 22000))
+    200,
+    Math.max(60, Math.round((bgCanvas.width * bgCanvas.height) / 11000))
   );
   while (bgNodes.length < target) {
     bgNodes.push({
@@ -401,7 +401,7 @@ function resizeBg() {
       y: Math.random() * bgCanvas.height,
       vx: (Math.random() - 0.5) * 0.35,
       vy: (Math.random() - 0.5) * 0.35,
-      r: 1.2 + Math.random() * 1.6,
+      r: 1.5 + Math.random() * 1.7,
     });
   }
   bgNodes.length = Math.min(bgNodes.length, target);
@@ -410,7 +410,7 @@ function resizeBg() {
 function drawBg() {
   const ctx = bgCanvas.getContext("2d");
   const rgb = plexusColor();
-  const LINK = 130;
+  const LINK = 150;
   ctx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
 
   for (const n of bgNodes) {
@@ -422,14 +422,14 @@ function drawBg() {
     if (n.y > bgCanvas.height + 20) n.y = -20;
   }
 
-  ctx.lineWidth = 1;
+  ctx.lineWidth = 1.5;
   for (let i = 0; i < bgNodes.length; i++) {
     for (let j = i + 1; j < bgNodes.length; j++) {
       const dx = bgNodes[i].x - bgNodes[j].x;
       const dy = bgNodes[i].y - bgNodes[j].y;
       const d2 = dx * dx + dy * dy;
       if (d2 < LINK * LINK) {
-        const a = (1 - Math.sqrt(d2) / LINK) * 0.5;
+        const a = (1 - Math.sqrt(d2) / LINK) * 0.8;
         ctx.strokeStyle = `rgba(${rgb}, ${a.toFixed(3)})`;
         ctx.beginPath();
         ctx.moveTo(bgNodes[i].x, bgNodes[i].y);
@@ -439,9 +439,9 @@ function drawBg() {
     }
   }
 
-  ctx.shadowBlur = 6;
+  ctx.shadowBlur = 8;
   for (const n of bgNodes) {
-    ctx.fillStyle = `rgba(${rgb}, 0.9)`;
+    ctx.fillStyle = `rgba(${rgb}, 1)`;
     ctx.shadowColor = `rgba(${rgb}, 0.9)`;
     ctx.beginPath();
     ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
