@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://fari-cloud.github.io/Cartoonify-in-Computer-vision/sitemap.xml

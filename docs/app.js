@@ -1,5 +1,5 @@
 const MAX_DIMENSION = 720;
-const SAMPLE_URL = "../examples/input.jpg";
+const SAMPLE_URL = "examples/input.jpg";
 
 const els = {
   dropZone: document.getElementById("drop-zone"),
