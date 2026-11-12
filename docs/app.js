@@ -328,3 +328,49 @@ els.dropZone.addEventListener("drop", (e) => loadFile(e.dataTransfer.files[0]));
 document.querySelectorAll('input[name="style"]').forEach((radio) =>
   radio.addEventListener("change", processCurrent)
 );
+
+const THEME_KEY = "cartoonify-theme";
+const themeBtn = document.getElementById("theme-btn");
+const themePopup = document.getElementById("theme-popup");
+let savedTheme = localStorage.getItem(THEME_KEY) || "neon";
+
+function applyTheme(name) {
+  document.documentElement.dataset.theme = name;
+  themePopup.querySelectorAll("button[data-theme]").forEach((b) =>
+    b.classList.toggle("active", b.dataset.theme === name)
+  );
+}
+
+themeBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  const open = themePopup.classList.toggle("open");
+  themeBtn.setAttribute("aria-expanded", String(open));
+});
+
+document.addEventListener("click", (e) => {
+  if (!themePopup.contains(e.target) && e.target !== themeBtn) {
+    themePopup.classList.remove("open");
+    themeBtn.setAttribute("aria-expanded", "false");
+  }
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    themePopup.classList.remove("open");
+    themeBtn.setAttribute("aria-expanded", "false");
+  }
+});
+
+themePopup.querySelectorAll("button[data-theme]").forEach((btn) => {
+  btn.addEventListener("mouseenter", () => applyTheme(btn.dataset.theme));
+  btn.addEventListener("mouseleave", () => applyTheme(savedTheme));
+  btn.addEventListener("click", () => {
+    savedTheme = btn.dataset.theme;
+    localStorage.setItem(THEME_KEY, savedTheme);
+    applyTheme(savedTheme);
+    themePopup.classList.remove("open");
+    themeBtn.setAttribute("aria-expanded", "false");
+  });
+});
+
+applyTheme(savedTheme);
