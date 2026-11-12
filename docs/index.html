@@ -52,6 +52,7 @@
   <main>
     <section class="panel controls-panel" id="controls">
       <div id="drop-zone" role="button" tabindex="0" aria-label="Upload a photo">
+        <p class="step-label">1 · Select a photo</p>
         <input type="file" id="file-input" accept="image/*" hidden />
         <div class="drop-icon" aria-hidden="true">
           <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0 4 4m-4-4-4 4"/><path d="M20 16v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2"/></svg>
@@ -62,22 +63,22 @@
       </div>
 
       <fieldset id="style-picker">
-        <legend>Choose a style</legend>
+        <legend>2 · Pick a style</legend>
         <label class="style-chip">
           <input type="radio" name="style" value="classic" checked />
-          <span class="chip-face"><span class="chip-emoji" aria-hidden="true">🎨</span>Classic</span>
+          <span class="chip-face"><span class="chip-emoji" aria-hidden="true">🎨</span>Classic<kbd>1</kbd></span>
         </label>
         <label class="style-chip">
           <input type="radio" name="style" value="sketch" />
-          <span class="chip-face"><span class="chip-emoji" aria-hidden="true">✏️</span>Sketch</span>
+          <span class="chip-face"><span class="chip-emoji" aria-hidden="true">✏️</span>Sketch<kbd>2</kbd></span>
         </label>
         <label class="style-chip">
           <input type="radio" name="style" value="comic" />
-          <span class="chip-face"><span class="chip-emoji" aria-hidden="true">💥</span>Comic</span>
+          <span class="chip-face"><span class="chip-emoji" aria-hidden="true">💥</span>Comic<kbd>3</kbd></span>
         </label>
         <label class="style-chip">
           <input type="radio" name="style" value="hdr" />
-          <span class="chip-face"><span class="chip-emoji" aria-hidden="true">✨</span>HDR</span>
+          <span class="chip-face"><span class="chip-emoji" aria-hidden="true">✨</span>HDR<kbd>4</kbd></span>
         </label>
       </fieldset>
     </section>
@@ -86,15 +87,16 @@
     <p id="loading" hidden><span class="spinner" aria-hidden="true"></span>Processing your image…</p>
 
     <section id="result-area" hidden>
-      <div id="canvases">
-        <figure class="canvas-card">
-          <div class="badge badge-in">Original</div>
+      <div class="canvas-card" id="compare-card">
+        <div id="compare">
           <canvas id="input-canvas"></canvas>
-        </figure>
-        <figure class="canvas-card">
+          <div id="compare-top">
+            <canvas id="output-canvas"></canvas>
+          </div>
+          <div id="compare-handle" aria-hidden="true"><span class="knob">⇄</span></div>
+          <div class="badge badge-in">Original</div>
           <div class="badge badge-out">Cartoon</div>
-          <canvas id="output-canvas"></canvas>
-        </figure>
+        </div>
       </div>
       <div id="actions">
         <a id="download-link" download="cartoon.png" class="btn btn-primary">
@@ -107,10 +109,14 @@
   </main>
 
   <footer>
+    <p class="credit">
+      Made with <span aria-hidden="true">💙</span> by <a href="https://github.com/fari-cloud" target="_blank" rel="noopener">fari-cloud</a>
+    </p>
     <p>
       Built with <a href="https://docs.opencv.org/4.x/d5/d10/tutorial_js_root.html" target="_blank" rel="noopener">OpenCV.js</a>
       &middot; Same pipeline as the <a href="https://github.com/fari-cloud/Cartoonify-in-Computer-vision" target="_blank" rel="noopener">Python package</a>
       &middot; <a href="https://github.com/fari-cloud/Cartoonify-in-Computer-vision/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+      &middot; Press <kbd>1</kbd>–<kbd>4</kbd> to switch styles
     </p>
   </footer>
 

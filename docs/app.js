@@ -470,3 +470,42 @@ window.addEventListener("resize", () => {
 });
 
 startBg();
+
+const styleRadios = [...document.querySelectorAll('input[name="style"]')];
+const SHORTCUT_KEYS = ["1", "2", "3", "4"];
+
+document.addEventListener("keydown", (e) => {
+  if (e.target.tagName === "INPUT" && e.target.type === "text") return;
+  const idx = SHORTCUT_KEYS.indexOf(e.key);
+  if (idx !== -1 && styleRadios[idx]) {
+    styleRadios[idx].checked = true;
+    processCurrent();
+  }
+});
+
+const compareWrap = document.getElementById("compare");
+let dragging = false;
+
+function setSplit(clientX) {
+  const rect = compareWrap.getBoundingClientRect();
+  const pct = Math.min(100, Math.max(0, ((clientX - rect.left) / rect.width) * 100));
+  compareWrap.style.setProperty("--split", pct.toFixed(2) + "%");
+}
+
+compareWrap.addEventListener("pointerdown", (e) => {
+  dragging = true;
+  compareWrap.setPointerCapture(e.pointerId);
+  setSplit(e.clientX);
+});
+
+compareWrap.addEventListener("pointermove", (e) => {
+  if (dragging) setSplit(e.clientX);
+});
+
+compareWrap.addEventListener("pointerup", () => {
+  dragging = false;
+});
+
+compareWrap.addEventListener("pointercancel", () => {
+  dragging = false;
+});
