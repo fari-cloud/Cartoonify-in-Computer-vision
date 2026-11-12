@@ -6,7 +6,7 @@ package with a CLI and tests.
 
 ## Live demo
 
-Try it in the browser — upload a photo, pick a style:
+**Artify** — try it in the browser, upload a photo, pick a style:
 
 **[https://fari-cloud.github.io/Cartoonify-in-Computer-vision/](https://fari-cloud.github.io/Cartoonify-in-Computer-vision/)**
 
