@@ -297,6 +297,12 @@ function updateDownloadLink() {
 els.dropZone.addEventListener("click", (e) => {
   if (e.target.tagName !== "BUTTON") els.fileInput.click();
 });
+els.dropZone.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" || e.key === " ") {
+    e.preventDefault();
+    els.fileInput.click();
+  }
+});
 els.browseBtn.addEventListener("click", () => els.fileInput.click());
 els.fileInput.addEventListener("change", () => loadFile(els.fileInput.files[0]));
 els.sampleBtn.addEventListener("click", () => {
